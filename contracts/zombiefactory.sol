@@ -1,6 +1,8 @@
-pragma solidity >=0.5.0 <0.6.0;
+pragma solidity >=0.4.0 <0.8.0;
 
 contract ZombieFactory {
+    event NewZombie(uint zombieId, string name, uint dna);
+
     uint dnaDigits = 16;
     //unit means unsigned intergers and can be any positive interger. if you use unit16 it will limit it to a 16-bit unsigned integer
     uint dnaModulus = 10 ** dnaDigits;
@@ -17,10 +19,20 @@ Zombie[] public zombies;
 
 function _createZombie (string memory _name, uint _dna) private {
     zombies.push(Zombie(_name, _dna));
+
+    uint id = zombies.push(Zombie(_name, _dna)) -1;
+    emit NewZombie(id, _name, _dna);
+}
     //This is the function that will create our zombie. Interestingly enough we made it a private function so that only other functions without our contact can call it. By convention we add an underscore _ to state this is a private function in our contact full of public functions.
-}
-    
+
 function _generateRandomDna (string memory _str) private view returns (uint) {
-    
+    uint rand = uint(keccak256(abi.encodePacked(_str)));
+    return rand % dnaModulus;
 }
+
+function _createRandomZombie (string memory _name) public {
+    uint randDna = _generateRandomDna(_name);
+    _createZombie(_name, randDna);
+}
+//From what i can tell this code is the public function what will run on the private randomDna function?
 }
